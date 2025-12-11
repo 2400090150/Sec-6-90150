@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student ERP — Home (Demo)</title>
+  <meta name="description" content="Demo single-page Student ERP: events, timetable, exams, fees, and AI assistant" />
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#98a0b3; --accent:#4f46e5; --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius: 12px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#071028 0%, #061226 100%);color:#e6eef8;min-height:100vh}
+    .container{max-width:1100px;margin:28px auto;padding:20px}
+
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700}
+    h1{margin:0;font-size:18px}
+    p.lead{color:var(--muted);margin:0;font-size:13px}
+
+    .grid{display:grid;grid-template-columns: 1fr 360px;gap:18px;margin-top:18px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr} .right-col{order:2}}
+
+    .card{background:linear-gradient(180deg,var(--card), rgba(11,18,32,0.8));border-radius:var(--radius);padding:16px;box-shadow:0 6px 24px rgba(2,6,23,0.6)}
+    .card h3{margin:0 0 10px 0}
+
+    /* Event carousel */
+    .carousel{position:relative;overflow:hidden;border-radius:10px}
+    .carousel-track{display:flex;transition:transform 400ms ease}
+    .event{min-width:260px;padding:16px;background:var(--glass);margin-right:12px;border-radius:10px}
+    .event h4{margin:0 0 8px 0}
+    .carousel-nav{display:flex;gap:8px;justify-content:center;margin-top:12px}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer}
+
+    /* Timetable */
+    .timetable{display:flex;flex-direction:column;gap:10px}
+    .period{display:flex;justify-content:space-between;padding:10px;border-radius:8px;background:var(--glass-2)}
+    .small{font-size:12px;color:var(--muted)}
+
+    /* Countdown cards */
+    .exam-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    @media (max-width:560px){.exam-list{grid-template-columns:1fr}}
+    .count{font-size:18px;font-weight:700}
+
+    /* Fee alert */
+    .badge{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(79,70,229,0.15);color:var(--accent);font-weight:600;font-size:13px}
+
+    /* Chatbot */
+    .chat{display:flex;flex-direction:column;height:420px}
+    .chat-messages{flex:1;overflow:auto;padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);margin-bottom:10px}
+    .msg{margin-bottom:8px;max-width:80%}
+    .msg.me{align-self:flex-end;background:linear-gradient(90deg,#1f2937,#111827);padding:8px;border-radius:8px}
+    .msg.bot{align-self:flex-start;background:rgba(255,255,255,0.03);padding:8px;border-radius:8px}
+    .input-row{display:flex;gap:8px}
+    input[type=text]{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .small-muted{font-size:12px;color:var(--muted)}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">ERP</div>
+        <div>
+          <h1>Student ERP — Home</h1>
+          <p class="lead">Personalised dashboard · Events · Timetable · Exams · Fees · AI assistant</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="small-muted">Welcome, Student</div>
+        <div class="badge">4 upcoming</div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <main>
+        <!-- Events -->
+        <section class="card">
+          <h3>Smart Event Discovery</h3>
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <div style="flex:1">
+              <div class="carousel" id="carousel">
+                <div class="carousel-track" id="carouselTrack">
+                  <!-- events populated by JS -->
+                </div>
+              </div>
+              <div class="carousel-nav">
+                <button class="btn" id="prevEvent">‹ Prev</button>
+                <button class="btn" id="nextEvent">Next ›</button>
+              </div>
+            </div>
+            <aside style="width:220px">
+              <div class="card" style="padding:12px">
+                <div class="small-muted">Notifications</div>
+                <div style="margin-top:10px">
+                  <div class="small">Exam - Data Structures in 3 days</div>
+                  <div class="small">Fee due: Oct 30 — Rs. 4500</div>
+                  <div class="small">New event: Coding Hackathon</div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- Timetable and Exams -->
+        <section style="display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:18px">
+          <div class="card">
+            <h3>Personalised Timetable</h3>
+            <div class="small-muted">Today: <span id="todayName"></span></div>
+            <div style="margin-top:10px" class="timetable" id="timetable"></div>
+            <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+              <button class="btn" id="prevDay">Prev Day</button>
+              <button class="btn" id="nextDay">Next Day</button>
+              <div style="margin-left:auto" class="small-muted">Mobile quick-access available</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Exam Countdown Dashboard</h3>
+            <div class="small-muted">Next exams & preparation resources</div>
+            <div style="margin-top:12px" class="exam-list" id="examList"></div>
+          </div>
+        </section>
+
+        <!-- Fee Alerts -->
+        <section class="card" style="margin-top:18px">
+          <h3>Fee Payment Alerts</h3>
+          <div style="display:flex;gap:12px;align-items:center">
+            <div>
+              <div class="small-muted">Next due</div>
+              <div style="font-weight:700;margin-top:6px">Rs. 4,500 — <span class="small-muted">Due in <span id="feeDueDays">—</span></span></div>
+              <div style="margin-top:8px" class="small-muted">Auto reminders: <strong id="autoRem">ON</strong></div>
+            </div>
+            <div style="margin-left:auto"> 
+              <button class="btn" id="payNow">Pay Now</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Right column: AI assistant & quick links -->
+      <aside class="right-col">
+        <div class="card chat" id="assistantCard">
+          <h3>AI Assistant</h3>
+          <div class="small-muted">Ask about timetables, attendance, fees, and events</div>
+          <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+          <div class="input-row">
+            <input type="text" id="chatInput" placeholder="Ask: When is my next exam?" />
+            <button class="btn" id="sendChat">Send</button>
+          </div>
+        </div>
+
+        <div style="height:18px"></div>
+        <div class="card">
+          <h3>Quick Links</h3>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+            <button class="btn">Attendance</button>
+            <button class="btn">My Courses</button>
+            <button class="btn">Payments</button>
+            <button class="btn">Events</button>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <footer>Demo • Built from presentation: "Revolutionising Student ERP: From Chaos to Clarity"</footer>
+  </div>
+
+  <script>
+    // ---------- Mock data ----------
+    const events = [
+      {title:'Freshers Meetup', when:'Nov 10, 2025', desc:'Icebreakers, clubs fair, snacks provided', seats:120},
+      {title:'Coding Hackathon', when:'Nov 14, 2025', desc:'24-hour team hack — Prizes for winners', seats:40},
+      {title:'Alumni Talk: Careers', when:'Nov 21, 2025', desc:'Resume workshops and Q&A', seats:200},
+      {title:'Cultural Night', when:'Dec 1, 2025', desc:'Music, dance and food stalls', seats:500}
+    ];
+
+    const timetableSample = {
+      // 0=Sun,1=Mon... we'll map to weekdays for demo
+      1: [
+        {time:'09:00 - 10:00', sub:'Mathematics', room:'B204', inst:'Dr. Rao'},
+        {time:'10:15 - 11:15', sub:'Data Structures', room:'C101', inst:'Prof. Mehta'},
+        {time:'11:30 - 12:30', sub:'Physics', room:'A303', inst:'Dr. Nair'}
+      ],
+      2: [
+        {time:'09:00 - 10:00', sub:'Chemistry', room:'B206', inst:'Dr. Iyer'},
+        {time:'10:15 - 11:15', sub:'Algorithms', room:'C102', inst:'Prof. Singh'},
+        {time:'11:30 - 12:30', sub:'Electronics', room:'A305', inst:'Dr. Patel'}
+      ],
+      3: [
+        {time:'09:00 - 10:00', sub:'English', room:'B102', inst:'Ms. Rao'},
+        {time:'10:15 - 11:15', sub:'Databases', room:'C201', inst:'Prof. Kumar'},
+        {time:'11:30 - 12:30', sub:'OS', room:'A101', inst:'Dr. Verma'}
+      ],
+      4: [
+        {time:'09:00 - 10:00', sub:'Math II', room:'B204', inst:'Dr. Rao'},
+        {time:'10:15 - 11:15', sub:'Networks', room:'C301', inst:'Prof. Shah'},
+        {time:'11:30 - 12:30', sub:'ML Basics', room:'A401', inst:'Dr. Joshi'}
+      ],
+      5: [
+        {time:'09:00 - 10:00', sub:'Seminar', room:'B501', inst:'Guest'},
+        {time:'10:15 - 11:15', sub:'Project Lab', room:'L1', inst:'Team Lead'},
+        {time:'11:30 - 12:30', sub:'Sports', room:'Ground', inst:'Coach'}
+      ]
+    };
+
+    const exams = [
+      {sub:'Data Structures', date:'2025-11-08T09:00:00'},
+      {sub:'Algorithms', date:'2025-11-12T14:00:00'},
+      {sub:'Databases', date:'2025-11-20T10:00:00'},
+    ];
+
+    const feeDueDate = new Date('2025-10-30T23:59:59');
+
+    // ---------- Utilities ----------
+    function formatDays(d){
+      if(d<0) return 'past';
+      if(d===0) return 'today';
+      if(d===1) return '1 day';
+      return d + ' days';
+    }
+
+    // ---------- Events carousel ----------
+    const carouselTrack = document.getElementById('carouselTrack');
+    let currentIndex = 0;
+    function renderEvents(){
+      carouselTrack.innerHTML = '';
+      events.forEach((ev,i)=>{
+        const card = document.createElement('div');
+        card.className = 'event';
+        card.innerHTML = `<h4>${ev.title}</h4><div class="small-muted">${ev.when}</div><p style="margin:8px 0 12px 0">${ev.desc}</p><div style="display:flex;gap:8px"><button class='btn' onclick="register(${i})">Register</button><button class='btn' onclick="more(${i})">Details</button></div>`;
+        carouselTrack.appendChild(card);
+      })
+      updateCarousel();
+    }
+    function updateCarousel(){
+      const width = 272; // event min width + margin
+      carouselTrack.style.transform = `translateX(${-currentIndex * width}px)`;
+    }
+    document.getElementById('prevEvent').addEventListener('click',()=>{currentIndex = Math.max(0,currentIndex-1);updateCarousel()});
+    document.getElementById('nextEvent').addEventListener('click',()=>{currentIndex = Math.min(events.length-1,currentIndex+1);updateCarousel()});
+
+    function register(i){
+      alert('Registered for: ' + events[i].title + " (demo)");
+    }
+    function more(i){
+      alert(events[i].title + '\n' + events[i].desc + '\nSeats: ' + events[i].seats);
+    }
+
+    // autoplay
+    setInterval(()=>{ currentIndex = (currentIndex+1) % events.length; updateCarousel(); }, 6000);
+
+    // ---------- Timetable ----------
+    const timetableEl = document.getElementById('timetable');
+    const todayNameEl = document.getElementById('todayName');
+    let displayDay = (new Date()).getDay();
+    function renderTimetable(day){
+      const map = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      todayNameEl.textContent = map[day];
+      timetableEl.innerHTML = '';
+      const periods = timetableSample[day] || [{time:'No classes',sub:'—',room:'—',inst:'—'}];
+      periods.forEach(p=>{
+        const d = document.createElement('div'); d.className='period';
+        d.innerHTML = `<div><div style="font-weight:700">${p.sub}</div><div class="small-muted">${p.inst} · ${p.room}</div></div><div class="small-muted">${p.time}</div>`;
+        timetableEl.appendChild(d);
+      })
+    }
+    document.getElementById('prevDay').addEventListener('click',()=>{ displayDay = (displayDay+6)%7; renderTimetable(displayDay); });
+    document.getElementById('nextDay').addEventListener('click',()=>{ displayDay = (displayDay+1)%7; renderTimetable(displayDay); });
+
+    // ---------- Exams countdown ----------
+    function renderExams(){
+      const examList = document.getElementById('examList'); examList.innerHTML = '';
+      exams.forEach(ex=>{
+        const wraps = document.createElement('div'); wraps.className='card'; wraps.style.padding='12px';
+        wraps.innerHTML = `<div style="font-weight:700">${ex.sub}</div><div class="small-muted">${new Date(ex.date).toLocaleString()}</div><div style="margin-top:8px" class="count" data-date="${ex.date}">—</div>`;
+        examList.appendChild(wraps);
+      })
+      updateCountdowns();
+    }
+    function updateCountdowns(){
+      document.querySelectorAll('[data-date]').forEach(el=>{
+        const then = new Date(el.dataset.date);
+        const diff = Math.floor((then - new Date())/1000);
+        if(diff<0){ el.textContent = 'Finished'; return; }
+        const d = Math.floor(diff/86400); const h = Math.floor((diff%86400)/3600); const m = Math.floor((diff%3600)/60);
+        el.textContent = `${d}d ${h}h ${m}m`;
+      })
+      // fee due days
+      const fdiff = Math.ceil((feeDueDate - new Date())/(1000*60*60*24));
+      document.getElementById('feeDueDays').textContent = formatDays(fdiff);
+    }
+    setInterval(updateCountdowns, 1000*60);
+
+    // ---------- Fee actions ----------
+    let autoReminders = true;
+    document.getElementById('payNow').addEventListener('click', ()=>{ alert('Redirecting to payment gateway (demo)'); });
+
+    // ---------- AI Assistant (mock) ----------
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const canned = [
+      {q:/timetable|schedule/i, a:()=>`Your next class: Data Structures at 10:15 in C101.`},
+      {q:/exam|next exam/i, a:()=>{ const n = exams[0]; return `Next exam: ${n.sub} on ${new Date(n.date).toLocaleString()}` }},
+      {q:/fee|payment/i, a:()=>`Your outstanding fee is Rs. 4,500. Due: ${feeDueDate.toLocaleDateString()}.`},
+      {q:/attendance/i, a:()=>`Attendance: 82% overall. Two subjects below 75% — check 'Attendance' page.`}
+    ];
+
+    function pushBot(text,from='bot'){
+      const el = document.createElement('div'); el.className = 'msg ' + (from==='me'?'me':'bot'); el.textContent = text; chatMessages.appendChild(el); chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    document.getElementById('sendChat').addEventListener('click', ()=>{ sendChat(); });
+    chatInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') sendChat(); });
+
+    function sendChat(){
+      const q = chatInput.value.trim(); if(!q) return; pushBot(q,'me'); chatInput.value='';
+      // simulate thinking
+      pushBot('Typing...', 'bot');
+      setTimeout(()=>{
+        // remove last typing
+        const nodes = Array.from(chatMessages.querySelectorAll('.msg.bot'));
+        const last = nodes[nodes.length-1]; if(last && last.textContent==='Typing...') last.remove();
+        // match
+        const found = canned.find(c=> c.q.test(q));
+        if(found){ pushBot(found.a()); } else {
+          // fallback: simple NL processing
+          if(/when|next/i.test(q)) pushBot('Your next event is: Coding Hackathon on Nov 14, 2025.');
+          else pushBot('I can help with timetables, fees, exams and events. Try: "When is my next exam?"');
+        }
+      }, 800 + Math.random()*800);
+    }
+
+    // ---------- Init ----------
+    function init(){ renderEvents(); renderTimetable(displayDay); renderExams(); updateCountdowns(); pushBot('Hi — I am your ERP assistant. Try: "When is my next exam?"'); }
+    init();
+
+    // Expose debug
+    window.register = register; window.more = more;
+  </script>
+</body>
+</html>
